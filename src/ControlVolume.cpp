@@ -1,5 +1,8 @@
-//
-// Created by gareth on 10/06/18.
-//
+#include "ControlVolume.h"
 
-#include "../include/ControlVolume.h"
+template <>
+ControlVolume<PressureField>::ControlVolume(
+        std::vector<std::pair<ControlVolume<PressureField>, Coordinates>> control_volumes) {
+}
+
+

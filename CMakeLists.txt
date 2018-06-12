@@ -29,7 +29,16 @@ add_executable(simple_cfd main.cpp)
 target_link_libraries(simple_cfd ${GTKMM_LIBRARIES})
 
 ##### Tests #####
+add_executable(PressureField_test
+        test/PressureField_test.cpp
+        src/PressureField.cpp
+        include/PressureField.h
+        )
+target_link_libraries(PressureField_test ${TESTING_LIBS})
+
 add_executable(ControlVolume_test
         test/ControlVolume_test.cpp
+        src/ControlVolume.cpp
+        include/ControlVolume.h
         )
 target_link_libraries(ControlVolume_test ${TESTING_LIBS})
