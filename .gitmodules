@@ -1,0 +1,3 @@
+[submodule "lib/multi_res_graph"]
+	path = lib/multi_res_graph
+	url = git@github.com:garethellis0/thunderbots-navigator.git
