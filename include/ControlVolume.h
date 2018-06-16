@@ -5,7 +5,6 @@
 #include <vector>
 
 // Project Includes
-#include "PressureField.h"
 
 
 // TODO: This is intentionally the the same as the one in the multi-res graph stuff, we should unify them
@@ -15,7 +14,6 @@ struct Coordinates {
 };
 
 // TODO: Descriptive comment here
-template <typename FieldType>
 class ControlVolume {
 public:
 
@@ -24,12 +22,11 @@ public:
      *
      * @param control_volumes a list of ControlVolumes and associated Coordinates
      */
-    ControlVolume(std::vector<std::pair<ControlVolume<FieldType>, Coordinates>> control_volumes);
+    ControlVolume(std::vector<std::pair<ControlVolume, Coordinates>> control_volumes);
 
 private:
 
-    // The Field contained in this ControlVolume
-    FieldType field;
+    // The pressure of this control volume
 };
 
 
