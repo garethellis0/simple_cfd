@@ -18,6 +18,12 @@ include_directories(${GMOCK_INCLUDE_DIRS})
 set(TESTING_LIBS ${GTEST_BOTH_LIBRARIES} pthread)
 enable_testing()
 
+##### External Libraries ######
+add_subdirectory(lib)
+
+# TODO: This is a hack, probably want to do it properly at some point
+include_directories(lib/multi_res_graph/geom)
+
 ##### GTK ######
 find_package(PkgConfig REQUIRED)
 pkg_check_modules("GTKMM" REQUIRED "gtkmm-3.0")
@@ -25,17 +31,16 @@ include_directories("${GTKMM_INCLUDE_DIRS}")
 link_directories("${GTKMM_LIBRARY_DIRS}")
 
 ##### Executables #####
-add_executable(simple_cfd main.cpp)
+add_executable(simple_cfd
+        main.cpp
+        src/GraphRenderer.cpp
+        src/ControlVolume.cpp
+        include/GraphRenderer.h
+        include/ControlVolume.h
+        )
 target_link_libraries(simple_cfd ${GTKMM_LIBRARIES})
 
 ##### Tests #####
-add_executable(PressureField_test
-        test/PressureField_test.cpp
-        src/PressureField.cpp
-        include/PressureField.h
-        )
-target_link_libraries(PressureField_test ${TESTING_LIBS})
-
 add_executable(ControlVolume_test
         test/ControlVolume_test.cpp
         src/ControlVolume.cpp
