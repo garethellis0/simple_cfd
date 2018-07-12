@@ -38,7 +38,7 @@ add_executable(simple_cfd
         include/GraphRenderer.h
         include/ControlVolume.h
         )
-target_link_libraries(simple_cfd ${GTKMM_LIBRARIES})
+target_link_libraries(simple_cfd ${GTKMM_LIBRARIES} units)
 
 ##### Tests #####
 add_executable(ControlVolume_test

@@ -1,2 +1,2 @@
 add_subdirectory(multi_res_graph)
-include_directories(units/include)
+add_subdirectory(units)
