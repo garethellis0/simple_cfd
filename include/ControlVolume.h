@@ -4,14 +4,17 @@
 // STD Includes
 #include <vector>
 
-// Project Includes
-// TODO: Should we be including this just for the `Coordinates` struct
-#include <multi_res_graph/Node.h>
+// Library Includes
+#include <units.h>
 
-// TODO: Better name?
-struct Vector2d {
-    double x;
-    double y;
+struct Point2d {
+    units::length::meter_t x;
+    units::length::meter_t y;
+};
+
+struct Velocity2d {
+    units::velocity::meters_per_second_t x;
+    units::velocity::meters_per_second_t y;
 };
 
 // TODO: Descriptive comment here
@@ -26,7 +29,7 @@ class ControlVolume {
      * @param pressure
      * @param velocity
      */
-    ControlVolume(double pressure, Vector2d velocity);
+    ControlVolume(double pressure, Velocity2d velocity);
 
     // TODO: We'll probably need to change this to work with arbitrary neighbours
     // TODO: Make args more succient?
@@ -41,18 +44,18 @@ class ControlVolume {
      * @param top_neighbour_with_coord
      * @param bottom_neighbour_with_coord
      */
-    ControlVolume(std::pair<ControlVolume, Coordinates> original_volume_with_coord,
-                  std::pair<ControlVolume, Coordinates> left_neighbour_with_coord,
-                  std::pair<ControlVolume, Coordinates> right_neighbour_with_coord,
-                  std::pair<ControlVolume, Coordinates> top_neighbour_with_coord,
-                  std::pair<ControlVolume, Coordinates> bottom_neighbour_with_coord);
+    ControlVolume(std::pair<ControlVolume, Point2d> original_volume_with_point,
+                  std::pair<ControlVolume, Point2d> left_neighbour_with_point,
+                  std::pair<ControlVolume, Point2d> right_neighbour_with_point,
+                  std::pair<ControlVolume, Point2d> top_neighbour_with_point,
+                  std::pair<ControlVolume, Point2d> bottom_neighbour_with_point);
 
     /**
      * Get the current pressure in this ControlVolume
      *
      * @return TODO?
      */
-    double getPressure(){
+    units::pressure::pascal_t getPressure(){
         return this->pressure;
     }
 
@@ -61,18 +64,18 @@ class ControlVolume {
      *
      * @return TODO?
      */
-    Vector2d getVelocity(){
+    Velocity2d getVelocity(){
         return this->velocity;
     }
 
   private:
     // TODO: Units?? Maybe indicate on variable name (or typedef)
     // The pressure in this control volume
-    double pressure;
+    units::pressure::pascal_t pressure;
 
     // TODO: Units? Maybe indicate on variable name (or typedef)
     // The velocity in this control volume
-    Vector2d velocity;
+    Velocity2d velocity;
 };
 
 #endif // SIMPLE_CFD_CONTROLVOLUME_H

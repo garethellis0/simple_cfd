@@ -7,9 +7,12 @@
 #include <cairomm/context.h>
 #include <glibmm/main.h>
 #include <sigc++/signal.h>
+#include <units.h>
 
 // Project Includes
 #include "GraphRenderer.h"
+
+using namespace units;
 
 GraphRenderer::GraphRenderer() : graph(std::make_shared<GraphNode<ControlVolume>>(1)) {
     //    Glib::signal_timeout().connect(sigc::mem_fun(*this,
@@ -51,7 +54,7 @@ bool GraphRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
             scaled_node_pos_x, scaled_node_pos_y, scaled_node_scale, scaled_node_scale);
 
         // Indicate the pressure by coloring the Node
-        double pressure = node->containedValue().getPressure();
+        double pressure = unit_cast<double>(node->containedValue().getPressure());
         ctx->set_source_rgba(1.0 * pressure, 0, 0, 0.8);
         ctx->fill_preserve();
         //ctx->restore();
@@ -60,11 +63,11 @@ bool GraphRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
 
 
         // Draw the velocity as a line
-        Vector2d velocity = node->containedValue().getVelocity();
+        Velocity2d velocity = node->containedValue().getVelocity();
         ctx->move_to(scaled_node_pos_x + scaled_node_scale / 2,
                      scaled_node_pos_y + scaled_node_scale / 2);
-        ctx->line_to(scaled_node_pos_x + scaled_node_scale / 2 + velocity.x,
-                     scaled_node_pos_y + scaled_node_scale / 2 + velocity.y);
+        ctx->line_to(scaled_node_pos_x + scaled_node_scale / 2 + unit_cast<double>(velocity.x),
+                     scaled_node_pos_y + scaled_node_scale / 2 + unit_cast<double>(velocity.y));
 
         // Indicate the pressure by coloring the cell
         // TODO

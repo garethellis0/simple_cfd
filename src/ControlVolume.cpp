@@ -1,13 +1,15 @@
 #include "ControlVolume.h"
 
-ControlVolume::ControlVolume() : pressure(0), velocity({0, 0}) {}
+using namespace units::literals;
+
+ControlVolume::ControlVolume() : pressure(0), velocity({0_m / 1_s, 0_m / 1_s}) {}
 
 ControlVolume::ControlVolume(
-    std::pair<ControlVolume, Coordinates> original_volume_with_coord,
-    std::pair<ControlVolume, Coordinates> left_neighbour_with_coord,
-    std::pair<ControlVolume, Coordinates> right_neighbour_with_coord,
-    std::pair<ControlVolume, Coordinates> top_neighbour_with_coord,
-    std::pair<ControlVolume, Coordinates> bottom_neighbour_with_coord) {
+    std::pair<ControlVolume, Point2d> original_volume_with_point,
+    std::pair<ControlVolume, Point2d> left_neighbour_with_point,
+    std::pair<ControlVolume, Point2d> right_neighbour_with_point,
+    std::pair<ControlVolume, Point2d> top_neighbour_with_point,
+    std::pair<ControlVolume, Point2d> bottom_neighbour_with_point) {
     // TODO: Should these conventions be somewhere else? Maybe put in README?
     /**
      * CONVENTIONS:
@@ -23,30 +25,31 @@ ControlVolume::ControlVolume(
      */
 
     ControlVolume original_vol, r_neighbour, l_neighbour, t_neighbour, b_neighbour;
-    Coordinates original_coord, r_coord, l_coord, t_coord, b_coord;
-    std::tie(original_vol, original_coord) = original_volume_with_coord;
-    std::tie(r_neighbour, r_coord)         = right_neighbour_with_coord;
-    std::tie(l_neighbour, l_coord)         = left_neighbour_with_coord;
-    std::tie(t_neighbour, t_coord)         = top_neighbour_with_coord;
-    std::tie(b_neighbour, b_coord)         = bottom_neighbour_with_coord;
+    Point2d original_point, r_point, l_point, t_point, b_point;
+    std::tie(original_vol, original_point) = original_volume_with_point;
+    std::tie(r_neighbour, r_point)         = right_neighbour_with_point;
+    std::tie(l_neighbour, l_point)         = left_neighbour_with_point;
+    std::tie(t_neighbour, t_point)         = top_neighbour_with_point;
+    std::tie(b_neighbour, b_point)         = bottom_neighbour_with_point;
 
-    double v_dot_x = (r_neighbour.velocity.x - original_vol.velocity.x) /
-                     (r_coord.x - original_coord.x);
-    double w_dot_w = (t_neighbour.velocity.y - original_vol.velocity.y) /
-                     (t_coord.y - original_coord.y);
-    double rho_dot_x =
-        (r_neighbour.pressure - original_vol.pressure) / (r_coord.x - original_coord.x);
-    double rho_dot_y =
-        (t_neighbour.pressure - original_vol.pressure) / (t_coord.y - original_coord.y);
-    double v_dotdot_x =
+    // TODO: Declare explicit types for each of these, will help catch errors
+    auto v_dot_x = (r_neighbour.velocity.x - original_vol.velocity.x) /
+                     (r_point.x - original_point.x);
+    auto w_dot_w = (t_neighbour.velocity.y - original_vol.velocity.y) /
+                     (t_point.y - original_point.y);
+    auto rho_dot_x =
+        (r_neighbour.pressure - original_vol.pressure) / (r_point.x - original_point.x);
+    auto rho_dot_y =
+        (t_neighbour.pressure - original_vol.pressure) / (t_point.y - original_point.y);
+    auto v_dotdot_x =
         (l_neighbour.velocity.x - 2 * original_vol.velocity.x +
          r_neighbour.velocity.x) /
-        ((original_coord.x - l_coord.x) * (r_coord.x - original_coord.x));
-    double w_dotdot_y =
+        ((original_point.x - l_point.x) * (r_point.x - original_point.x));
+    auto w_dotdot_y =
         (b_neighbour.velocity.y - 2 * original_vol.velocity.y +
          t_neighbour.velocity.y) /
-        ((original_coord.y - l_coord.y) * (r_coord.y - original_coord.y));
+        ((original_point.y - l_point.y) * (r_point.y - original_point.y));
 }
 
-ControlVolume::ControlVolume(double pressure, Vector2d velocity)
+ControlVolume::ControlVolume(double pressure, Velocity2d velocity)
   : pressure(pressure), velocity(velocity) {}
