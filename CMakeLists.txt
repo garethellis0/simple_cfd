@@ -46,4 +46,4 @@ add_executable(ControlVolume_test
         src/ControlVolume.cpp
         include/ControlVolume.h
         )
-target_link_libraries(ControlVolume_test ${TESTING_LIBS})
+target_link_libraries(ControlVolume_test ${TESTING_LIBS} units)
