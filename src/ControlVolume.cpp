@@ -66,6 +66,15 @@ ControlVolume::ControlVolume(
     auto w_dotdot_y = (b_neighbour.velocity.y - 2 * w_old + t_neighbour.velocity.y) /
                       ((original_point.y - b_point.y) * (t_point.y - original_point.y));
 
+    auto a = v_old - dt * (v_dot_x + w_dot_y) * v_old;
+    auto b = dt / density * p_dot_x;
+    auto c = dt * viscosity * (v_dotdot_x + v_dotdot_y);
+
+    auto d = a - b;
+    auto e = b + c;
+    auto f = a + c;
+    auto g = a - b + c;
+
     this->velocity.x = v_old - dt * (v_dot_x + w_dot_y) * v_old -
                        dt / density * p_dot_x +
                        dt * viscosity * (v_dotdot_x + v_dotdot_y);

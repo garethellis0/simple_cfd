@@ -69,6 +69,28 @@ class ControlVolume {
                   units::velocity::meters_per_second_t speed_of_sound);
 
     /**
+     * Update this ControlVolume based on the value of it's neighbours and how much time
+     * has passed
+     *
+     * The arguments supplied are the neighbouring ControlVolume's with a point that
+     * indicates their position *RELATIVE* to this ControlVolume
+     *
+     * @param left_neighbour_with_point
+     * @param right_neighbour_with_point
+     * @param top_neighbour_with_point
+     * @param bottom_neighbour_with_point
+     * @param dt TODO
+     */
+    void update(
+            std::pair<ControlVolume, Point2d> left_neighbour_with_point,
+            std::pair<ControlVolume, Point2d> right_neighbour_with_point,
+            std::pair<ControlVolume, Point2d> top_neighbour_with_point,
+            std::pair<ControlVolume, Point2d> bottom_neighbour_with_point,
+            units::time::second_t dt
+            );
+
+
+    /**
      * Get the current pressure in this ControlVolume
      *
      * @return TODO?
@@ -107,7 +129,7 @@ class ControlVolume {
     // The velocity in this control volume
     Velocity2d velocity;
 
-    // TODO: Do we want to keep things like viscosity, density, etc. as member variables
+    // TODO: These should really be more universal values, but we
 };
 
 #endif // SIMPLE_CFD_CONTROLVOLUME_H
