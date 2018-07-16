@@ -1,8 +1,12 @@
 # simple_cfd
 
+
 **TODO: Project Decription here**
 - uses `boost::units` to help ensure correctness
 - uses a custom multi-resolution graph implementation to ensure there is higher resolution in areas of greater change
+
+## Cloning 
+- simple run `git clone --recursive git@github.com:garethellis0/simple_cfd.git` to get this project with its dependencies
 
 ## TODO
 - [ ] Bring in the multi-resolution graph as a submodule, instead of just as files
@@ -17,7 +21,6 @@
 
 ### Grid Splitting
 - When the pressure change over a timestep exceeds a threshold for a point, split that point (and vice versa, merge points with little change)
-
 
 ## Progress
 June 2nd, 2018:
