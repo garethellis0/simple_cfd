@@ -8,17 +8,17 @@
 #include <units.h>
 
 namespace units {
-namespace viscosity {
-    using meters               = units::length::meters;
-    using seconds              = units::time::seconds;
-    using meters_squared_per_s = compound_unit<squared<meters>, inverse<seconds>>;
-    using meters_squared_per_s_t =
+    namespace viscosity {
+        using meters               = units::length::meters;
+        using seconds              = units::time::seconds;
+        using meters_squared_per_s = compound_unit<squared<meters>, inverse<seconds>>;
+        using meters_squared_per_s_t =
         units::unit_t<meters_squared_per_s, double, units::linear_scale>;
-}
-namespace density {
-    using kg_per_cu_m_t =
+    }
+    namespace density {
+        using kg_per_cu_m_t =
         units::unit_t<units::density::kg_per_cu_m, double, units::linear_scale>;
-}
+    }
 }
 
 struct Point2d {
@@ -33,7 +33,7 @@ struct Velocity2d {
 
 // TODO: Descriptive comment here
 class ControlVolume {
-  public:
+public:
     ControlVolume();
 
     /**
@@ -41,29 +41,7 @@ class ControlVolume {
      * @param pressure
      * @param velocity
      */
-    ControlVolume(double pressure, Velocity2d velocity);
-
-    // TODO: Make this into an `update` function and add setters for constant values?
-    // TODO: We'll probably need to change this to work with arbitrary neighbours
-    // TODO: Make args more succient?
-    /**
-     * Construct a new ControlVolume from a given ControlVolume and it's neighbours
-     *
-     * TODO: ASCII diagram here to show where each "volume" is
-     *
-     * @param original_volume_with_coord
-     * @param left_neighbour_with_coord
-     * @param right_neighbour_with_coord
-     * @param top_neighbour_with_coord
-     * @param bottom_neighbour_with_coord
-     * @param dt TODO
-     */
-    ControlVolume(std::pair<ControlVolume, Point2d> original_volume_with_point,
-                  std::pair<ControlVolume, Point2d> left_neighbour_with_point,
-                  std::pair<ControlVolume, Point2d> right_neighbour_with_point,
-                  std::pair<ControlVolume, Point2d> top_neighbour_with_point,
-                  std::pair<ControlVolume, Point2d> bottom_neighbour_with_point,
-                  units::time::second_t dt,
+    ControlVolume(units::pressure::pascal_t pressure, Velocity2d velocity,
                   units::density::kg_per_cu_m_t density,
                   units::viscosity::meters_squared_per_s_t viscosity,
                   units::velocity::meters_per_second_t speed_of_sound);
@@ -74,6 +52,8 @@ class ControlVolume {
      *
      * The arguments supplied are the neighbouring ControlVolume's with a point that
      * indicates their position *RELATIVE* to this ControlVolume
+     *
+     * TODO: ASCII diagram here to show where each "volume" is (and +x, +y)
      *
      * @param left_neighbour_with_point
      * @param right_neighbour_with_point
@@ -87,7 +67,7 @@ class ControlVolume {
             std::pair<ControlVolume, Point2d> top_neighbour_with_point,
             std::pair<ControlVolume, Point2d> bottom_neighbour_with_point,
             units::time::second_t dt
-            );
+    );
 
 
     /**
@@ -102,7 +82,7 @@ class ControlVolume {
      *
      * @param pressure  TODO?
      */
-    void setPressure(units::pressure::pascal_t pressure) {this->pressure = pressure;}
+    void setPressure(units::pressure::pascal_t pressure) { this->pressure = pressure; }
 
     /**
      * Get the current velocity in this ControlVolume
@@ -122,7 +102,16 @@ class ControlVolume {
     Velocity2d new_velocity;
     units::pressure::pascal_t new_pressure;
 
-  private:
+private:
+    // The density of the fluid in this ControlVolume
+    units::density::kg_per_cu_m_t density;
+
+    // The viscosity of the fluid in this ControlVolume
+    units::viscosity::meters_squared_per_s_t viscosity;
+
+    // The speed of sound in the fluid in this ControlVolume
+    units::velocity::meters_per_second_t speed_of_sound;
+
     // The pressure in this control volume
     units::pressure::pascal_t pressure;
 
