@@ -6,7 +6,7 @@ protected:
     }
 };
 
-TEST_F(ControlVolumeTest, a){
+TEST_F(ControlVolumeTest, updateTest){
 }
 
 int main(int argc, char **argv)

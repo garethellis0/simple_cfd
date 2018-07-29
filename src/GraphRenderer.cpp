@@ -17,6 +17,10 @@ using namespace units;
 using namespace units::literals;
 using namespace units::time;
 using namespace units::length;
+using namespace units::viscosity;
+using namespace units::density;
+using namespace units::pressure;
+using namespace units::velocity;
 
 GraphRenderer::GraphRenderer() : graph(std::make_shared<GraphNode<ControlVolume>>(1)) {
     Glib::signal_timeout().connect(sigc::mem_fun(*this, &GraphRenderer::on_timeout),
@@ -44,6 +48,13 @@ bool GraphRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
     const int graph_size  = std::min(window_width, window_height);
     double scaling_factor = graph_size / this->graph->getScale();
 
+    // Figure out the appropriate scale for the temperatures
+    std::vector<double>  pressures;
+    for (const auto& node: all_nodes){
+        pressures.emplace_back(node->containedValue().getPressure().to<double>());
+    }
+    double
+
     for (const std::shared_ptr<RealNode<ControlVolume>>& node : all_nodes) {
         // Reset drawing stuff
         ctx->move_to(0, 0);
@@ -58,7 +69,7 @@ bool GraphRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
 
         // Indicate the pressure by coloring the Node
         double pressure = unit_cast<double>(node->containedValue().getPressure());
-        ctx->set_source_rgba(0.001 * pressure, 0, 0, 0.8);
+        ctx->set_source_rgba(0.01 * pressure, 0, 0, 0.8);
         ctx->fill_preserve();
         // ctx->restore();
         // ctx->stroke_preserve();
@@ -125,7 +136,13 @@ void GraphRenderer::update_graph(units::time::second_t dt) {
     auto nodes = graph->getAllSubNodes();
 
     // A edge node
-    ControlVolume edge_volume(0, Velocity2d({0_m / 1_s, 0_m / 1_s}));
+    ControlVolume edge_volume(
+            pascal_t(0),
+            Velocity2d({0_m / 1_s, 0_m / 1_s}),
+            kg_per_cu_m_t(1),
+            meters_squared_per_s_t (1),
+            meters_per_second_t(343)
+            );
 
     // TODO: this is all a bit of a hack
     for (auto& node : nodes) {
@@ -194,15 +211,14 @@ void GraphRenderer::update_graph(units::time::second_t dt) {
         }
 
         // Figure out new values for the volume
-        ControlVolume new_volume(std::make_pair(original_volume, original_volume_point),
-                                 std::make_pair(left_neighbour, left_neighbour_point),
-                                 std::make_pair(right_neighbour, right_neighbour_point),
-                                 std::make_pair(top_neighbour, top_neighbour_point),
-                                 std::make_pair(bottom_neighbour, bottom_neighbour_point),
-                                 units::time::second_t(0.1),
-                                 units::density::kg_per_cu_m_t(1000),
-                                 units::viscosity::meters_squared_per_s_t(1.8),
-                                 units::velocity::meters_per_second_t(343));
+        ControlVolume new_volume = original_volume;
+        new_volume.update(
+                std::make_pair(left_neighbour, left_neighbour_point),
+                std::make_pair(right_neighbour, right_neighbour_point),
+                std::make_pair(top_neighbour, top_neighbour_point),
+                std::make_pair(bottom_neighbour, bottom_neighbour_point),
+                units::time::second_t(0.1)
+                );
         node->containedValue().new_pressure = new_volume.getPressure();
         node->containedValue().new_velocity = new_volume.getVelocity();
     }
