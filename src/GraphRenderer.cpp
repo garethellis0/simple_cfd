@@ -53,7 +53,6 @@ bool GraphRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
     for (const auto& node: all_nodes){
         pressures.emplace_back(node->containedValue().getPressure().to<double>());
     }
-    double
 
     for (const std::shared_ptr<RealNode<ControlVolume>>& node : all_nodes) {
         // Reset drawing stuff
@@ -213,10 +212,10 @@ void GraphRenderer::update_graph(units::time::second_t dt) {
         // Figure out new values for the volume
         ControlVolume new_volume = original_volume;
         new_volume.update(
-                std::make_pair(left_neighbour, left_neighbour_point),
-                std::make_pair(right_neighbour, right_neighbour_point),
-                std::make_pair(top_neighbour, top_neighbour_point),
-                std::make_pair(bottom_neighbour, bottom_neighbour_point),
+                std::make_pair(left_neighbour, left_neighbour_point.x),
+                std::make_pair(right_neighbour, right_neighbour_point.x),
+                std::make_pair(top_neighbour, top_neighbour_point.y),
+                std::make_pair(bottom_neighbour, bottom_neighbour_point.y),
                 units::time::second_t(0.1)
                 );
         node->containedValue().new_pressure = new_volume.getPressure();

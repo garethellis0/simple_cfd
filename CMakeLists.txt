@@ -22,7 +22,7 @@ enable_testing()
 add_subdirectory(lib)
 
 # TODO: This is a hack, probably want to do it properly at some point
-include_directories(lib/multi_res_graph/geom)
+include_directories(lib/multi_res_graph/include)
 
 ##### GTK ######
 find_package(PkgConfig REQUIRED)

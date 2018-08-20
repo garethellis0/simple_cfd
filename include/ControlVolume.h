@@ -7,6 +7,7 @@
 // Library Includes
 #include <units.h>
 
+// Custom Units
 namespace units {
     namespace viscosity {
         using meters               = units::length::meters;
@@ -36,6 +37,7 @@ class ControlVolume {
 public:
     ControlVolume();
 
+    // TODO: Since all neighbours are treated as being divergent from this volume in only one dimension, should we pass in a Pair<ControlVolume, distance> instead of Pair<ControlVolume, Point>?
     /**
      * Construct a ControlVolume with a given pressure and velocity *
      * @param pressure
@@ -62,10 +64,10 @@ public:
      * @param dt TODO
      */
     void update(
-            std::pair<ControlVolume, Point2d> left_neighbour_with_point,
-            std::pair<ControlVolume, Point2d> right_neighbour_with_point,
-            std::pair<ControlVolume, Point2d> top_neighbour_with_point,
-            std::pair<ControlVolume, Point2d> bottom_neighbour_with_point,
+            std::pair<ControlVolume, units::length::meter_t> left_neighbour_with_distance,
+            std::pair<ControlVolume, units::length::meter_t> right_neighbour_with_distance,
+            std::pair<ControlVolume, units::length::meter_t> top_neighbour_with_distance,
+            std::pair<ControlVolume, units::length::meter_t> bottom_neighbour_with_distance,
             units::time::second_t dt
     );
 
