@@ -66,31 +66,15 @@ TEST_F(ControlVolumeTest, update_right_volume_high_pressure) {
 
     updateCenterVolume();
 
-    // TODO: Figure out how to do floating point LE comparisons properly, so we can compare to 0 instead of `-0.01`
-    EXPECT_LT(center_volume.getVelocity().x.to<double>(), 0);
+    EXPECT_GT(center_volume.getVelocity().x.to<double>(), 0);
     EXPECT_DOUBLE_EQ(0, center_volume.getVelocity().y.to<double>());
     EXPECT_LT(center_volume.getPressure().to<double>(), 0);
 }
 
 // Test updating a Volume with:
-// - non-zero pressure on right, zero pressure everywhere else
+// - non-zero pressure on left, zero pressure everywhere else
 // - zero velocity everywhere
-TEST_F(ControlVolumeTest, update_left_volume_high_pressure) {
-    left_volume.setPressure(pascal_t(10));
-
-    updateCenterVolume();
-
-    EXPECT_GE(center_volume.getVelocity().x.to<double>(), 0);
-    EXPECT_DOUBLE_EQ(0, center_volume.getVelocity().y.to<double>());
-    EXPECT_DOUBLE_EQ(0, center_volume.getPressure().to<double>());
-
-    updateCenterVolume();
-
-    // TODO: Figure out how to do floating point LE comparisons properly, so we can compare to 0 instead of `-0.01`
-    EXPECT_LE(center_volume.getPressure().to<double>(), -0.01);
-    EXPECT_DOUBLE_EQ(0, center_volume.getVelocity().y.to<double>());
-    EXPECT_LE(center_volume.getPressure().to<double>(), -0.01);
-}
+// TODO
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);

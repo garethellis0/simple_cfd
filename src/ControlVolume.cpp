@@ -74,7 +74,7 @@ void ControlVolume::update(
         (abs(b_distance) * abs(t_distance));
 
     auto w_dotdot_x =
-        (l_neighbour.velocity.x - 2 * this->velocity.x + r_neighbour.velocity.x) /
+        (l_neighbour.velocity.y - 2 * this->velocity.y + r_neighbour.velocity.y) /
         (abs(l_distance) * abs(r_distance));
     auto w_dotdot_y =
         (b_neighbour.velocity.y - 2 * this->velocity.y + t_neighbour.velocity.y) /
@@ -90,4 +90,11 @@ void ControlVolume::update(
     // TODO: this might be correct because "c" is a constant though?????
     this->pressure -= dt * units::math::pow<2>(speed_of_sound) * (v_dot_x + w_dot_y) *
                       1_kg / units::math::pow<3>(1_m);
+
+    // TODO: We should be checking for invalid input values (like distances <= 0) and
+    // throwing appropriate exceptions
+
+    if (std::isnan(-this->velocity.x.to<double>()) || std::isnan(-this->velocity.x.to<double>()) || std::isnan(-this->pressure.to<double>())){
+        std::cout << "NAN member" << std::endl;
+    }
 }
