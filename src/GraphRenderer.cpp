@@ -49,9 +49,10 @@ bool GraphRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
     double scaling_factor = graph_size / this->graph->getScale();
 
     // Figure out the appropriate scale for the temperatures
-    std::vector<double>  pressures;
-    for (const auto& node: all_nodes){
-        pressures.emplace_back(node->containedValue().getPressure().to<double>());
+    double max_pressure = all_nodes[0]->containedValue().getPressure().to<double>();
+    for (const auto& node : all_nodes) {
+        double pressure = node->containedValue().getPressure().to<double>();
+        max_pressure = std::max(pressure, max_pressure);
     }
 
     for (const std::shared_ptr<RealNode<ControlVolume>>& node : all_nodes) {
@@ -68,7 +69,7 @@ bool GraphRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
 
         // Indicate the pressure by coloring the Node
         double pressure = unit_cast<double>(node->containedValue().getPressure());
-        ctx->set_source_rgba(0.01 * pressure, 0, 0, 0.8);
+        ctx->set_source_rgba(pressure / max_pressure, 0, 0, 0.8);
         ctx->fill_preserve();
         // ctx->restore();
         // ctx->stroke_preserve();
@@ -76,8 +77,9 @@ bool GraphRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
 
         // Draw the velocity as a line
         Velocity2d velocity = node->containedValue().getVelocity();
-        auto velocity_magnitude = units::math::pow<2>(velocity.x) + units::math::pow<2>(velocity.y);
-        if (velocity_magnitude.to<double>() != 0){
+        auto velocity_magnitude =
+            units::math::pow<2>(velocity.x) + units::math::pow<2>(velocity.y);
+        if (velocity_magnitude.to<double>() != 0) {
             velocity.x = velocity.x / velocity_magnitude.to<double>();
             velocity.y = velocity.y / velocity_magnitude.to<double>();
         }
@@ -134,92 +136,84 @@ void GraphRenderer::draw_graph(std::shared_ptr<GraphNode<ControlVolume>> graph) 
 void GraphRenderer::update_graph(units::time::second_t dt) {
     auto nodes = graph->getAllSubNodes();
 
-    // A edge node
-    ControlVolume edge_volume(
-            pascal_t(0),
-            Velocity2d({0_m / 1_s, 0_m / 1_s}),
-            kg_per_cu_m_t(1),
-            meters_squared_per_s_t (1),
-            meters_per_second_t(343)
-            );
+    // A edge volume
+    ControlVolume edge_volume(pascal_t(0),
+                              Velocity2d({0_m / 1_s, 0_m / 1_s}),
+                              kg_per_cu_m_t(1),
+                              meters_squared_per_s_t(1),
+                              meters_per_second_t(343));
+    meter_t edge_volume_displacement =
+        meter_t(graph->getScale() / graph->getResolution());
 
-    // TODO: this is all a bit of a hack
+    // TODO: hax, delete
     for (auto& node : nodes) {
-        auto neighbours = node->getNeighbours();
+        node->containedValue().new_pressure = node->containedValue().getPressure();
+        node->containedValue().new_velocity = node->containedValue().getVelocity();
+    }
 
-        // Look for neighbours
-        std::experimental::optional<ControlVolume> left_neighbour_op,
-            right_neighbour_op, top_neighbour_op, bottom_neighbour_op;
-        Point2d left_neighbour_point, right_neighbour_point, top_neighbour_point,
-            bottom_neighbour_point;
-        for (auto& neighbour : neighbours) {
-            Point2d neighbour_point({
-                meter_t(neighbour->getCoordinates().x),
-                meter_t(neighbour->getCoordinates().y),
-            });
+    for (auto& node : nodes) {
+        std::shared_ptr<RealNode<ControlVolume>> left_neighbour_ptr =
+            node->getLeftNeighbour();
+        std::shared_ptr<RealNode<ControlVolume>> right_neighbour_ptr =
+            node->getRightNeighbour();
+        std::shared_ptr<RealNode<ControlVolume>> top_neighbour_ptr =
+            node->getTopNeighbour();
+        std::shared_ptr<RealNode<ControlVolume>> bottom_neighbour_ptr =
+            node->getBottomNeighbour();
 
-            if (neighbour->getCoordinates().x < node->getCoordinates().x) {
-                left_neighbour_op    = ControlVolume(neighbour->containedValue());
-                left_neighbour_point = neighbour_point;
-            }
-
-            if (neighbour->getCoordinates().x > node->getCoordinates().x) {
-                right_neighbour_op    = ControlVolume(neighbour->containedValue());
-                right_neighbour_point = neighbour_point;
-            }
-
-            if (neighbour->getCoordinates().y < node->getCoordinates().y) {
-                bottom_neighbour_op    = ControlVolume(neighbour->containedValue());
-                bottom_neighbour_point = neighbour_point;
-            }
-
-            if (neighbour->getCoordinates().y > node->getCoordinates().y) {
-                top_neighbour_op    = ControlVolume(neighbour->containedValue());
-                top_neighbour_point = neighbour_point;
-            }
-        }
-
-        // If we couldn't find a neighbour, then it's an edge case
         ControlVolume left_neighbour, right_neighbour, top_neighbour, bottom_neighbour;
-        left_neighbour   = left_neighbour_op ? *left_neighbour_op : edge_volume;
-        right_neighbour  = right_neighbour_op ? *right_neighbour_op : edge_volume;
-        bottom_neighbour = bottom_neighbour_op ? *bottom_neighbour_op : edge_volume;
-        top_neighbour    = top_neighbour_op ? *top_neighbour_op : edge_volume;
+        meter_t left_neighbour_distance, right_neighbour_distance,
+            top_neighbour_distance, bottom_neighbour_distance;
 
-        ControlVolume original_volume(node->containedValue());
-        Point2d original_volume_point({
-                                              meter_t(node->getCoordinates().x), meter_t(node->getCoordinates().y),
-                                      });
-
-        // Take a guess for where the boundry nodes should be
-        if (!left_neighbour_op){
-            left_neighbour_point = original_volume_point;
-            left_neighbour_point.x -= meter_t(graph->getScale()/graph->getResolution());
+        // TODO: This is gross, clean it up
+        // If we couldn't find a neighbour, then it's an edge case
+        if (left_neighbour_ptr) {
+            left_neighbour          = left_neighbour_ptr->containedValue();
+            left_neighbour_distance = meter_t(
+                abs(left_neighbour_ptr->getCoordinates().x - node->getCoordinates().x));
+        } else {
+            left_neighbour          = edge_volume;
+            right_neighbour.setVelocity({1_m / 1_s, 0_m/1_s});
+            right_neighbour.setPressure(pascal_t(1));
+            left_neighbour_distance = edge_volume_displacement;
         }
-        if (!right_neighbour_op){
-            right_neighbour_point = original_volume_point;
-            right_neighbour_point.x += meter_t(graph->getScale()/graph->getResolution());
+        if (right_neighbour_ptr) {
+            right_neighbour          = right_neighbour_ptr->containedValue();
+            right_neighbour_distance = meter_t(abs(
+                right_neighbour_ptr->getCoordinates().x - node->getCoordinates().x));
+        } else {
+            right_neighbour          = edge_volume;
+            right_neighbour.setVelocity({1_m / 1_s, 0_m/1_s});
+            right_neighbour.setPressure(pascal_t(-1));
+            right_neighbour_distance = edge_volume_displacement;
         }
-        if (!bottom_neighbour_op){
-            bottom_neighbour_point = original_volume_point;
-            bottom_neighbour_point.y -= meter_t(graph->getScale()/graph->getResolution());
+        if (top_neighbour_ptr) {
+            top_neighbour          = top_neighbour_ptr->containedValue();
+            top_neighbour_distance = meter_t(
+                abs(top_neighbour_ptr->getCoordinates().y - node->getCoordinates().y));
+        } else {
+            top_neighbour          = edge_volume;
+            top_neighbour_distance = edge_volume_displacement;
         }
-        if (!top_neighbour_op){
-            top_neighbour_point = original_volume_point;
-            top_neighbour_point.y += meter_t(graph->getScale()/graph->getResolution());
+        if (bottom_neighbour_ptr) {
+            bottom_neighbour          = bottom_neighbour_ptr->containedValue();
+            bottom_neighbour_distance = meter_t(abs(
+                bottom_neighbour_ptr->getCoordinates().y - node->getCoordinates().y));
+        } else {
+            bottom_neighbour          = edge_volume;
+            bottom_neighbour_distance = edge_volume_displacement;
         }
 
         // Figure out new values for the volume
-        ControlVolume new_volume = original_volume;
-        new_volume.update(
-                std::make_pair(left_neighbour, left_neighbour_point.x),
-                std::make_pair(right_neighbour, right_neighbour_point.x),
-                std::make_pair(top_neighbour, top_neighbour_point.y),
-                std::make_pair(bottom_neighbour, bottom_neighbour_point.y),
-                units::time::second_t(0.1)
-                );
+        ControlVolume new_volume = node->containedValue();
+        new_volume.update(std::make_pair(left_neighbour, left_neighbour_distance),
+                          std::make_pair(right_neighbour, right_neighbour_distance),
+                          std::make_pair(top_neighbour, top_neighbour_distance),
+                          std::make_pair(bottom_neighbour, bottom_neighbour_distance),
+                          units::time::second_t(0.1));
         node->containedValue().new_pressure = new_volume.getPressure();
         node->containedValue().new_velocity = new_volume.getVelocity();
+
     }
 
     // After figuring out new values for every volume, update them all
@@ -227,5 +221,4 @@ void GraphRenderer::update_graph(units::time::second_t dt) {
         node->containedValue().setPressure(node->containedValue().new_pressure);
         node->containedValue().setVelocity(node->containedValue().new_velocity);
     }
-
 }

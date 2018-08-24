@@ -52,15 +52,15 @@ public:
      * Update this ControlVolume based on the value of it's neighbours and how much time
      * has passed
      *
-     * The arguments supplied are the neighbouring ControlVolume's with a point that
-     * indicates their position *RELATIVE* to this ControlVolume
+     * The arguments supplied are the neighbouring ControlVolume's with their *absolute*
+     * distance to this ControlVolume
      *
      * TODO: ASCII diagram here to show where each "volume" is (and +x, +y)
      *
-     * @param left_neighbour_with_point
-     * @param right_neighbour_with_point
-     * @param top_neighbour_with_point
-     * @param bottom_neighbour_with_point
+     * @param left_neighbour_with_distance
+     * @param right_neighbour_with_distance
+     * @param top_neighbour_with_distance
+     * @param bottom_neighbour_with_distance
      * @param dt TODO
      */
     void update(

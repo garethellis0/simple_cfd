@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     window.add(graph_renderer);
     graph_renderer.show();
 
-    auto graph = std::make_shared<GraphNode<ControlVolume>>(30, 1);
+    auto graph = std::make_shared<GraphNode<ControlVolume>>(10, 10);
 
     // Set the pressure of some nodes on the left to a higher value
     auto high_pressure_nodes = graph->getAllNodesThatPassFilter(

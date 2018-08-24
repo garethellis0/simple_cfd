@@ -13,9 +13,10 @@ using namespace units::math;
 ControlVolume::ControlVolume()
   : pressure(0),
     velocity({meters_per_second_t(0), meters_per_second_t(0)}),
-    density(0),
-    viscosity(0),
-    speed_of_sound(0) {}
+    // TODO: These should all be 0, should be set by user
+    density(1),
+    viscosity(1),
+    speed_of_sound(1) {}
 
 ControlVolume::ControlVolume(units::pressure::pascal_t pressure,
                              Velocity2d velocity,
