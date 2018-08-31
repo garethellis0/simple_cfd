@@ -13,7 +13,7 @@
 - [x] ~Model "Euler Equations" https://en.wikipedia.org/wiki/Euler_equations_(fluid_dynamics)~ (decided to just go right for Navier-Stokes, not much harder and gives better results)
 - [x] Model "Navier-Stokes" https://en.wikipedia.org/wiki/Navier%E2%80%93Stokes_equations and solve for velocity (somewhat done, modeled Navier-Stokes with slight compressability via a pressure approx. from velocity)
 - [x] Extract pressure from Navier-Stokes velocity field
-- [ ] Clean up the graph rendering code and change the render model to allow for update steps longer then the render cycle time
+- [x] Clean up the graph rendering code and change the render model to allow for update steps longer then the render cycle time
 - [ ] Build an (programmatic) interface for adding obstacles
 - [ ] Come up with a better visualisation scheme
 - [ ] Change the update model to use interpolation and generate a totally new graph each time, instead of just updating the existing one (prep for dynamic mesh generation)

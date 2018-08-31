@@ -20,9 +20,8 @@ int main(int argc, char** argv) {
 
     GraphRenderer graph_renderer;
     window.add(graph_renderer);
-    graph_renderer.show();
 
-    auto graph = std::make_shared<GraphNode<ControlVolume>>(10, 10);
+    auto graph = std::make_shared<GraphNode<ControlVolume>>(20, 10);
 
     // Set the pressure of some nodes on the left to a higher value
     auto high_pressure_nodes = graph->getAllNodesThatPassFilter(
@@ -31,12 +30,8 @@ int main(int argc, char** argv) {
         node->containedValue().setPressure(pascal_t(1));
     }
 
-    // auto subnodes = graph->getAllSubNodes();
-    // subnodes[0]->convertToGraphNode(5);
-    // Velocity2d v = {40_m / 1_s, 40_m / 1_s};
-    // subnodes[1]->containedValue() = ControlVolume(10, v);
-
-    graph_renderer.draw_graph(graph);
+    graph_renderer.set_graph(graph);
+    graph_renderer.show();
 
     return app->run(window);
 }

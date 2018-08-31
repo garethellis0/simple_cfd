@@ -22,9 +22,12 @@ using namespace units::density;
 using namespace units::pressure;
 using namespace units::velocity;
 
-GraphRenderer::GraphRenderer() : graph(std::make_shared<GraphNode<ControlVolume>>(1)) {
-    Glib::signal_timeout().connect(sigc::mem_fun(*this, &GraphRenderer::on_timeout),
-                                   1000);
+GraphRenderer::GraphRenderer() :
+graph(std::make_shared<GraphNode<ControlVolume>>(1))
+{
+    // We will update and re-draw the graph whenever there is nothing going on
+    // (and so presumably when the last update loop has finished)
+    Glib::signal_idle().connect(sigc::mem_fun(*this, &GraphRenderer::update));
 }
 
 bool GraphRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
@@ -32,11 +35,7 @@ bool GraphRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
     const int window_width            = window_allocation.get_width();
     const int window_height           = window_allocation.get_height();
 
-    // Draw the background
     ctx->save();
-    //    ctx->set_source_rgba(0, 0, 0, 0.9);
-    //    ctx->paint();
-    //    ctx->restore();
 
     // Draw all the nodes in the graph
     ctx->set_line_width(1);
@@ -89,9 +88,6 @@ bool GraphRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
             scaled_node_pos_x + scaled_node_scale / 2 + unit_cast<double>(velocity.x),
             scaled_node_pos_y + scaled_node_scale / 2 + unit_cast<double>(velocity.y));
 
-        // Indicate the pressure by coloring the cell
-        // TODO
-
         ctx->set_source_rgba(1.0, 1.0, 1.0, 0.8);
         ctx->set_line_width(1);
         ctx->stroke();
@@ -102,21 +98,13 @@ bool GraphRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
     ctx->stroke_preserve();
     ctx->clip();
 
-    // Draw the Graph
-    // cr->arc(0, 0, 100, 0, 2 * M_PI);
-    // cr->save();
-    // cr->set_source_rgba(1.0, 1.0, 1.0, 0.8);
-    // cr->fill_preserve();
-    // cr->restore();
-    // cr->stroke_preserve();
-    // cr->clip();
-
     return true;
 }
 
-bool GraphRenderer::on_timeout() {
+bool GraphRenderer::update() {
     update_graph(second_t(0.00001));
 
+    // Invalidate the entire window to force a full re-draw
     auto window = get_window();
     if (window) {
         Gdk::Rectangle r(
@@ -125,12 +113,9 @@ bool GraphRenderer::on_timeout() {
     }
 }
 
-void GraphRenderer::draw_graph(std::shared_ptr<GraphNode<ControlVolume>> graph) {
+void GraphRenderer::set_graph(std::shared_ptr<GraphNode<ControlVolume>> graph) {
     // Save the graph to draw
-    this->graph = graph;
-
-    // Clear the graph and force a redraw
-    // this->on_timeout();
+    this->graph = std::move(graph);
 }
 
 void GraphRenderer::update_graph(units::time::second_t dt) {
@@ -145,7 +130,7 @@ void GraphRenderer::update_graph(units::time::second_t dt) {
     meter_t edge_volume_displacement =
         meter_t(graph->getScale() / graph->getResolution());
 
-    // TODO: hax, delete
+    // NOTE: This is a bit of a hack, but it'll become irrelevent eventually anyhow
     for (auto& node : nodes) {
         node->containedValue().new_pressure = node->containedValue().getPressure();
         node->containedValue().new_velocity = node->containedValue().getVelocity();
@@ -173,8 +158,6 @@ void GraphRenderer::update_graph(units::time::second_t dt) {
                 abs(left_neighbour_ptr->getCoordinates().x - node->getCoordinates().x));
         } else {
             left_neighbour          = edge_volume;
-            right_neighbour.setVelocity({1_m / 1_s, 0_m/1_s});
-            right_neighbour.setPressure(pascal_t(1));
             left_neighbour_distance = edge_volume_displacement;
         }
         if (right_neighbour_ptr) {
@@ -183,8 +166,6 @@ void GraphRenderer::update_graph(units::time::second_t dt) {
                 right_neighbour_ptr->getCoordinates().x - node->getCoordinates().x));
         } else {
             right_neighbour          = edge_volume;
-            right_neighbour.setVelocity({1_m / 1_s, 0_m/1_s});
-            right_neighbour.setPressure(pascal_t(-1));
             right_neighbour_distance = edge_volume_displacement;
         }
         if (top_neighbour_ptr) {
@@ -210,13 +191,13 @@ void GraphRenderer::update_graph(units::time::second_t dt) {
                           std::make_pair(right_neighbour, right_neighbour_distance),
                           std::make_pair(top_neighbour, top_neighbour_distance),
                           std::make_pair(bottom_neighbour, bottom_neighbour_distance),
-                          units::time::second_t(0.1));
+                          dt);
         node->containedValue().new_pressure = new_volume.getPressure();
         node->containedValue().new_velocity = new_volume.getVelocity();
 
     }
 
-    // After figuring out new values for every volume, update them all
+    // After figuring out new values for every control volume, update them all
     for (auto& node : nodes) {
         node->containedValue().setPressure(node->containedValue().new_pressure);
         node->containedValue().setVelocity(node->containedValue().new_velocity);
