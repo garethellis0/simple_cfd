@@ -94,7 +94,7 @@ void ControlVolume::update(
     // TODO: We should be checking for invalid input values (like distances <= 0) and
     // throwing appropriate exceptions
 
-    if (std::isnan(-this->velocity.x.to<double>()) || std::isnan(-this->velocity.x.to<double>()) || std::isnan(-this->pressure.to<double>())){
-        std::cout << "NAN member" << std::endl;
-    }
+    // TODO: We should be checking for calculation instabilities
+    // (basically absurdly large numbers arising out of stuff like have too large
+    // of a time step), as these can cause crashes (maybe throw an exception)?
 }

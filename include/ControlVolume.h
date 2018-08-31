@@ -1,5 +1,4 @@
-#ifndef SIMPLE_CFD_CONTROLVOLUME_H
-#define SIMPLE_CFD_CONTROLVOLUME_H
+#pragma once
 
 // STD Includes
 #include <vector>
@@ -22,11 +21,6 @@ namespace units {
     }
 }
 
-struct Point2d {
-    units::length::meter_t x;
-    units::length::meter_t y;
-};
-
 struct Velocity2d {
     units::velocity::meters_per_second_t x;
     units::velocity::meters_per_second_t y;
@@ -37,7 +31,6 @@ class ControlVolume {
 public:
     ControlVolume();
 
-    // TODO: Since all neighbours are treated as being divergent from this volume in only one dimension, should we pass in a Pair<ControlVolume, distance> instead of Pair<ControlVolume, Point>?
     /**
      * Construct a ControlVolume with a given pressure and velocity *
      * @param pressure
@@ -100,7 +93,8 @@ public:
      */
     void setVelocity(Velocity2d velocity) { this->velocity = velocity; }
 
-    // TODO: REMOVE THIS
+    // TODO: Eventually we'll move to generate a totally new graph with interpolation
+    // each time, then we can DELETE THESE
     Velocity2d new_velocity;
     units::pressure::pascal_t new_pressure;
 
@@ -122,5 +116,3 @@ private:
 
     // TODO: These should really be more universal values, but we
 };
-
-#endif // SIMPLE_CFD_CONTROLVOLUME_H

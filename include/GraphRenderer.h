@@ -1,5 +1,4 @@
-#ifndef SIMPLE_CFD_GRAPHRENDERER_H
-#define SIMPLE_CFD_GRAPHRENDERER_H
+#pragma once
 
 // STD Includes
 
@@ -17,7 +16,7 @@ public:
     GraphRenderer();
 
     // TODO: Doc comment
-    void draw_graph(std::shared_ptr<GraphNode<ControlVolume>> graph);
+    void set_graph(std::shared_ptr<GraphNode<ControlVolume>> graph);
 
 protected:
     // Override default signal handler
@@ -25,7 +24,7 @@ protected:
 
     // TODO: Better name
     // TODO: Doc comment
-    bool on_timeout();
+    bool update();
 
 private:
 
@@ -39,6 +38,3 @@ private:
     // The top level node for the graph
     std::shared_ptr<GraphNode<ControlVolume>> graph;
 };
-
-
-#endif //SIMPLE_CFD_GRAPHRENDERER_H

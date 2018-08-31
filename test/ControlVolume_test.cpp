@@ -76,6 +76,8 @@ TEST_F(ControlVolumeTest, update_right_volume_high_pressure) {
 // - zero velocity everywhere
 // TODO
 
+// TODO: More sanity checks
+
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
