@@ -32,3 +32,5 @@
 ## Progress
 June 2nd, 2018:
 ![screenshot from 2018-07-02 06-10-57](https://user-images.githubusercontent.com/9075711/42166058-b97058f2-7dbe-11e8-9962-97a9cb1b7200.png)
+August 30th, 2018 (took a bit of a break...):
+![demo](https://user-images.githubusercontent.com/9075711/44887938-cdeb9480-ac8b-11e8-8aae-cdc133495163.gif)
