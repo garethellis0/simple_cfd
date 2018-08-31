@@ -29,8 +29,11 @@ struct Velocity2d {
 // TODO: Descriptive comment here
 class ControlVolume {
 public:
+    // TODO: We should really delete the default constructor, but right now multi_res_graph
+    // requires a default constructor for it's containing
     ControlVolume();
 
+    // TODO: Since all neighbours are treated as being divergent from this volume in only one dimension, should we pass in a Pair<ControlVolume, distance> instead of Pair<ControlVolume, Point>?
     /**
      * Construct a ControlVolume with a given pressure and velocity *
      * @param pressure
@@ -93,7 +96,7 @@ public:
      */
     void setVelocity(Velocity2d velocity) { this->velocity = velocity; }
 
-    // TODO: Eventually we'll move to generate a totally new graph with interpolation
+    // TODO: Eventually we'll move to generate a totally new simulator with interpolation
     // each time, then we can DELETE THESE
     Velocity2d new_velocity;
     units::pressure::pascal_t new_pressure;

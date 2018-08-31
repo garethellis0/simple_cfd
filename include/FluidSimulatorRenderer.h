@@ -9,14 +9,17 @@
 
 // Project Includes
 #include "ControlVolume.h"
+#include "FluidSimulator.h"
 
 // TODO: Rename to `ControlVolumeGraphRenderer`?
-class GraphRenderer : public Gtk::DrawingArea {
+class FluidSimulatorRenderer : public Gtk::DrawingArea {
 public:
-    GraphRenderer();
+    FluidSimulatorRenderer() = delete;
+
+    FluidSimulatorRenderer(FluidSimulator simulator);
 
     // TODO: Doc comment
-    void set_graph(std::shared_ptr<GraphNode<ControlVolume>> graph);
+    void set_simulator_to_render(FluidSimulator simulator);
 
 protected:
     // Override default signal handler
@@ -35,6 +38,6 @@ private:
      */
     void update_graph(units::time::second_t dt);
 
-    // The top level node for the graph
-    std::shared_ptr<GraphNode<ControlVolume>> graph;
+    // The FluidSimulator we're rendering
+    FluidSimulator simulator;
 };

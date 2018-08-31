@@ -33,10 +33,9 @@ link_directories("${GTKMM_LIBRARY_DIRS}")
 ##### Executables #####
 add_executable(simple_cfd
         main.cpp
-        src/GraphRenderer.cpp
+        src/FluidSimulatorRenderer.cpp
         src/ControlVolume.cpp
-        include/GraphRenderer.h
-        include/ControlVolume.h
+        src/FluidSimulator.cpp
         )
 target_link_libraries(simple_cfd ${GTKMM_LIBRARIES} units)
 
