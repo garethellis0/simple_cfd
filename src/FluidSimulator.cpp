@@ -121,6 +121,19 @@ void FluidSimulator::updateControlVolumes(units::time::second_t dt) {
         node->containedValue().setPressure(node->containedValue().new_pressure);
         node->containedValue().setVelocity(node->containedValue().new_velocity);
     }
+
+    // Set fluid velocity and pressure to 0 for all control volumes within obstacles
+    for (auto& node : nodes) {
+        for (auto& obstacle : obstacles){
+            if (obstacle->overlapsNode(*node)) {
+                ControlVolume& control_volume = node->containedValue();
+                // TODO: Make 0 X and Y velocity a constant somewhere?
+                control_volume.setVelocity({meters_per_second_t(0), meters_per_second_t(0)});
+                control_volume.setPressure(pascal_t(0));
+                break;
+            }
+        }
+    }
 }
 
 std::shared_ptr<GraphNode<ControlVolume>> FluidSimulator::getControlVolumeGraph() {
@@ -130,4 +143,18 @@ std::shared_ptr<GraphNode<ControlVolume>> FluidSimulator::getControlVolumeGraph(
 void
 FluidSimulator::setControlVolumeGraph(std::shared_ptr<GraphNode<ControlVolume>> graph) {
     control_volume_graph = std::move(graph);
+}
+
+void FluidSimulator::addObstacle(std::shared_ptr<Area<ControlVolume>> obstacle) {
+    obstacles.emplace_back(std::shared_ptr(obstacle->clone()));
+}
+
+std::vector<std::shared_ptr<Area<ControlVolume>>> FluidSimulator::getObstacles() {
+    std::vector<std::shared_ptr<Area<ControlVolume>>> obstacles_copy;
+
+    for (const auto& obstacle : obstacles){
+        obstacles_copy.emplace_back(std::shared_ptr(obstacle->clone()));
+    }
+
+    return obstacles_copy;
 }

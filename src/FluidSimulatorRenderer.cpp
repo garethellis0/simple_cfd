@@ -1,4 +1,5 @@
 // STD Includes
+#include <math.h>
 #include <cmath>
 #include <ctime>
 #include <experimental/optional>
@@ -24,7 +25,7 @@ using namespace units::pressure;
 using namespace units::velocity;
 
 FluidSimulatorRenderer::FluidSimulatorRenderer(FluidSimulator simulator) :
-simulator(simulator){
+simulator(std::move(simulator)){
     // We will update and re-draw the simulator whenever there is nothing going on
     // (and so presumably when the last update loop has finished)
     Glib::signal_idle().connect(sigc::mem_fun(*this, &FluidSimulatorRenderer::update));
@@ -46,6 +47,9 @@ bool FluidSimulatorRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
     std::vector<std::shared_ptr<RealNode<ControlVolume>>> all_nodes =
         control_volume_graph->getAllSubNodes();
 
+    std::vector<std::shared_ptr<Area<ControlVolume>>> obstacles =
+            simulator.getObstacles();
+
     // The simulator should fit the smaller of the width and height
     const int graph_size  = std::min(window_width, window_height);
     double scaling_factor = graph_size / control_volume_graph->getScale();
@@ -58,6 +62,16 @@ bool FluidSimulatorRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
     }
 
     for (const std::shared_ptr<RealNode<ControlVolume>>& node : all_nodes) {
+
+        // Check if this node is within an obstacle
+        bool is_obstacle = false;
+        for (auto& obstacle : obstacles) {
+            if (obstacle->overlapsNode(*node)){
+                is_obstacle = true;
+                break;
+            }
+        }
+
         // Reset drawing stuff
         ctx->move_to(0, 0);
 
@@ -69,15 +83,20 @@ bool FluidSimulatorRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
         ctx->rectangle(
             scaled_node_pos_x, scaled_node_pos_y, scaled_node_scale, scaled_node_scale);
 
-        // Indicate the pressure by coloring the Node
-        auto pressure = unit_cast<double>(node->containedValue().getPressure());
-        ctx->set_source_rgba(pressure / max_pressure, 0, 0, 0.8);
+        // Indicate the pressure (or that this is an obstacle) by coloring the Node
+        if (is_obstacle){
+            ctx->set_source_rgba(0, 1, 0, 0.5);
+        } else {
+            auto pressure = unit_cast<double>(node->containedValue().getPressure());
+            ctx->set_source_rgba(pressure / max_pressure, 0, 0, 0.8);
+        }
         ctx->fill_preserve();
 
         // Draw the velocity as a line
         Velocity2d velocity = node->containedValue().getVelocity();
         auto velocity_magnitude =
-            units::math::pow<2>(velocity.x) + units::math::pow<2>(velocity.y);
+                units::math::pow<2>(velocity.x) + units::math::pow<2>(velocity.y);
+
         if (velocity_magnitude.to<double>() != 0) {
             velocity.x = velocity.x / velocity_magnitude.to<double>();
             velocity.y = velocity.y / velocity_magnitude.to<double>();
@@ -85,8 +104,8 @@ bool FluidSimulatorRenderer::on_draw(const Cairo::RefPtr<Cairo::Context>& ctx) {
         ctx->move_to(scaled_node_pos_x + scaled_node_scale / 2,
                      scaled_node_pos_y + scaled_node_scale / 2);
         ctx->line_to(
-            scaled_node_pos_x + scaled_node_scale / 2 + unit_cast<double>(velocity.x),
-            scaled_node_pos_y + scaled_node_scale / 2 + unit_cast<double>(velocity.y));
+                scaled_node_pos_x + scaled_node_scale / 2 + unit_cast<double>(velocity.x),
+                scaled_node_pos_y + scaled_node_scale / 2 + unit_cast<double>(velocity.y));
 
         ctx->set_source_rgba(1.0, 1.0, 1.0, 0.8);
         ctx->set_line_width(1);

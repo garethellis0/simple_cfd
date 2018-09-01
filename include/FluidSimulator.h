@@ -32,6 +32,7 @@ class FluidSimulator {
                    units::length::meter_t simulation_size,
                    int initial_simulation_resolution);
 
+    // TODO: Test me!
     /**
      * Update all the control volumes based on their current values
      *
@@ -53,6 +54,20 @@ class FluidSimulator {
      * Sets the multi resolution graph of all the control volumes
      */
     void setControlVolumeGraph(std::shared_ptr<GraphNode<ControlVolume>> graph);
+
+    /**
+     * Add the given obstacle to the simulation
+     *
+     * @param obstacle
+     */
+    void addObstacle(std::shared_ptr<Area<ControlVolume>> obstacle);
+
+    /**
+     * Get all the obstacles
+     *
+     * @return a copy of the vector containing all obstacles
+     */
+    std::vector<std::shared_ptr<Area<ControlVolume>>> getObstacles();
 
   private:
     // The density of the fluid
