@@ -11,6 +11,11 @@
 // Project Includes
 #include "ControlVolume.h"
 
+struct Point2d {
+    units::length::meter_t x;
+    units::length::meter_t y;
+};
+
 // TODO: Descriptive comment here
 class FluidSimulator {
   public:
@@ -49,7 +54,8 @@ class FluidSimulator {
      */
     std::shared_ptr<GraphNode<ControlVolume>> getControlVolumeGraph();
 
-    // TODO: We should be passing in an object, not a pointer, but we need to implement deep copy for multi-res graphs first
+    // TODO: We should be passing in an object, not a pointer, but we need to implement
+    // deep copy for multi-res graphs first
     /**
      * Sets the multi resolution graph of all the control volumes
      */
@@ -69,6 +75,21 @@ class FluidSimulator {
      */
     std::vector<std::shared_ptr<Area<ControlVolume>>> getObstacles();
 
+    /**
+     * Get points along a StreamLine starting from the given point
+     *
+     * @param start_point the point to start the streamline at
+     * @param line_length TODO
+     * @param distance_between_points TODO
+     *
+     * @return a vector of points representing the streamline, with the first point on
+     * the streamline being the first point in the vector
+     */
+    std::vector<Point2d>
+        getStreamLinePoints(Point2d start_point,
+                            units::length::meter_t line_length,
+                            units::length::meter_t distance_between_points);
+
   private:
     // The density of the fluid
     units::density::kg_per_cu_m_t density;
@@ -82,6 +103,9 @@ class FluidSimulator {
     // The actual simulator the holds all the control volumes
     std::shared_ptr<GraphNode<ControlVolume>> control_volume_graph;
 
+    // TODO: We should change this to something like `unique_ptr` or override the copy
+    // constructor, because right now we can "copy" this FluidSimulator, but the copy
+    // will have pointers to the same obstacles
     // TODO: Better comment here
     // Solid obstacles that may overlap control volume(s)
     std::vector<std::shared_ptr<Area<ControlVolume>>> obstacles;
