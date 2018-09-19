@@ -20,6 +20,7 @@
 - [ ] Implement basic mesh generation (higher resolution in areas that need it)
 - [ ] Build a basic GUI for setting up the configuration parameters (min/max mesh resolution, update time step, etc.)
 - [ ] Add basic GUI for adding obstacles (maybe upload PNG's drawn in paint?)
+- [ ] Implement automatic step-sizes (basically make sure the _Courant-Friedrichs-Lewy_ condition is satisfied at each step)
 
 ## Notes
 - The Navier-Stokes is just a generalized version of the Euler equations
